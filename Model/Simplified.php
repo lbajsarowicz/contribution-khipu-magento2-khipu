@@ -86,8 +86,8 @@ class Simplified extends AbstractMethod
         ManagerInterface $messageManager,
         PaymentMethods $paymentMethods,
         MethodsTable $methodsTable,
-        AbstractResource $resource = null,
-        AbstractDb $resourceCollection = null,
+        ?AbstractResource $resource = null,
+        ?AbstractDb $resourceCollection = null,
         array $data = array()
     )
     {
@@ -179,7 +179,7 @@ class Simplified extends AbstractMethod
             return $existente;
         }
 
-        $token = substr(md5(rand()), 0, 32);
+        $token = substr(hash('md5', (string) rand()), 0, 32);
         $payment->setAdditionalInformation('khipu_order_token', $token);
         $payment->save();
 

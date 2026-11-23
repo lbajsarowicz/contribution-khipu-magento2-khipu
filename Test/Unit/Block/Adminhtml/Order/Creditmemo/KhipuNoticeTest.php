@@ -27,7 +27,6 @@ class KhipuNoticeTest extends TestCase
             ->getMock();
 
         $p = (new \ReflectionClass(KhipuNotice::class))->getProperty('registry');
-        $p->setAccessible(true);
         $p->setValue($this->block, $this->registry);
     }
 

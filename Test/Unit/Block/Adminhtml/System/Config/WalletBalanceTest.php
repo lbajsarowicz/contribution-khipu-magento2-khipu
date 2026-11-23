@@ -31,7 +31,6 @@ class WalletBalanceTest extends TestCase
         $reflection = new \ReflectionClass(WalletBalance::class);
         foreach (['refundService' => $this->service, '_scopeConfig' => $this->scopeConfig] as $prop => $valor) {
             $p = $reflection->getProperty($prop);
-            $p->setAccessible(true);
             $p->setValue($this->block, $valor);
         }
     }

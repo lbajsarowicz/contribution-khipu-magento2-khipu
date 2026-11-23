@@ -8,6 +8,7 @@ use Khipu\Payment\Model\Refund\Service;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\HTTP\ClientInterface;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class ServiceTest extends TestCase
@@ -202,6 +203,7 @@ class ServiceTest extends TestCase
     /**
      * @dataProvider camposObligatoriosDeLaReversa
      */
+    #[DataProvider('camposObligatoriosDeLaReversa')]
     public function testReversaSinUnCampoObligatorioEsError(string $campo): void
     {
         $body = json_decode($this->bodyDeReversa(), true);

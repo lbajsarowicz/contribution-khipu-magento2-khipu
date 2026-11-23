@@ -20,6 +20,7 @@ use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Creditmemo;
 use Magento\Sales\Model\Order\Payment;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -57,7 +58,6 @@ class SimplifiedTest extends TestCase
     private function inyectar(string $propiedad, $valor): void
     {
         $prop = new \ReflectionProperty(Simplified::class, $propiedad);
-        $prop->setAccessible(true);
         $prop->setValue($this->method, $valor);
     }
 
@@ -669,6 +669,7 @@ class SimplifiedTest extends TestCase
     /**
      * @dataProvider estadosPagados
      */
+    #[DataProvider('estadosPagados')]
     public function testCobroYaPagadoVaALaPaginaDeExitoSinCrearOtro(string $status): void
     {
         [$order] = $this->ordenConCobroPrevio();
