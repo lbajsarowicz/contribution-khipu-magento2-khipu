@@ -12,11 +12,15 @@ use Magento\Sales\Model\Order\Config as OrderConfig;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment;
+use Magento\Sales\Model\ResourceModel\Order as OrderResource;
+use Magento\Sales\Model\ResourceModel\Order\Invoice as InvoiceResource;
 use PHPUnit\Framework\TestCase;
 
 class CallbackTest extends TestCase
 {
     private Callback $callback;
+    private OrderResource $orderResource;
+    private InvoiceResource $invoiceResource;
 
     protected function setUp(): void
     {
@@ -40,6 +44,10 @@ class CallbackTest extends TestCase
         $this->inyectar('khipuPayment', $khipuPayment);
         $this->inyectar('captureRegistrar', $this->createMock(CaptureRegistrar::class));
         $this->inyectar('orderSender', $this->createMock(OrderSender::class));
+        $this->orderResource = $this->createMock(OrderResource::class);
+        $this->invoiceResource = $this->createMock(InvoiceResource::class);
+        $this->inyectar('orderResource', $this->orderResource);
+        $this->inyectar('invoiceResource', $this->invoiceResource);
     }
 
     protected function tearDown(): void
@@ -50,7 +58,6 @@ class CallbackTest extends TestCase
     private function inyectar(string $propiedad, $valor): void
     {
         $prop = new \ReflectionProperty(Callback::class, $propiedad);
-        $prop->setAccessible(true);
         $prop->setValue($this->callback, $valor);
     }
 
@@ -146,7 +153,8 @@ class CallbackTest extends TestCase
         $order = $this->orden();
         $order->expects($this->once())->method('addStatusToHistory')
             ->with('complete', $this->stringContains('Pago Khipu Aceptado'));
-        $order->expects($this->once())->method('save');
+        $this->orderResource->expects($this->once())->method('save')->with($order);
+        $this->invoiceResource->expects($this->once())->method('save')->with($this->isInstanceOf(Invoice::class));
 
         $this->callback->validateKhipuCallback($order, $this->notificacionLigoPay(), '3.0');
     }
@@ -157,7 +165,8 @@ class CallbackTest extends TestCase
         $order = $this->orden('q3prvfhnazc9');
         $order->expects($this->never())->method('prepareInvoice');
         $order->expects($this->never())->method('addStatusToHistory');
-        $order->expects($this->never())->method('save');
+        $this->orderResource->expects($this->never())->method('save');
+        $this->invoiceResource->expects($this->never())->method('save');
         $sender = $this->createMock(OrderSender::class);
         $sender->expects($this->never())->method('send');
         $this->inyectar('orderSender', $sender);

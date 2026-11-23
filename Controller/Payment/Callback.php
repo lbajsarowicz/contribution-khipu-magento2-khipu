@@ -12,6 +12,8 @@ use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
+use Magento\Sales\Model\ResourceModel\Order as OrderResource;
+use Magento\Sales\Model\ResourceModel\Order\Invoice as InvoiceResource;
 
 class Callback extends Action implements CsrfAwareActionInterface
 {
@@ -29,9 +31,10 @@ class Callback extends Action implements CsrfAwareActionInterface
         JsonFactory $resultJsonFactory,
         ScopeConfigInterface $scopeConfig,
         OrderSender $orderSender,
-        CaptureRegistrar $captureRegistrar
-    )
-    {
+        CaptureRegistrar $captureRegistrar,
+        private readonly InvoiceResource $invoiceResource,
+        private readonly OrderResource $orderResource
+    ) {
         parent::__construct($context);
         $this->order = $order;
         $this->khipuPayment = $khipuPayment;
@@ -124,7 +127,7 @@ class Callback extends Action implements CsrfAwareActionInterface
     public function validateKhipuCallback(Order $order, $notificationData, $apiVersion)
     {
         if (!$order || !$order->getIncrementId()) {
-            throw new \Exception('Order #' . $_REQUEST['order_id'] . ' does not exist');
+            throw new \Exception('Order #' . $this->getRequest()->getParam('order_id') . ' does not exist');
         }
 
         if ($apiVersion != '3.0') {
@@ -181,7 +184,7 @@ class Callback extends Action implements CsrfAwareActionInterface
         );
 
         $invoice->register();
-        $invoice->save();
+        $this->invoiceResource->save($invoice);
         $payment->save();
 
         $paymentCompleteStatus = $this->scopeConfig->getValue('payment/simplified/payment_complete_status');
@@ -190,7 +193,7 @@ class Callback extends Action implements CsrfAwareActionInterface
         $order->setStatus($order->getConfig()->getStateDefaultStatus($paymentCompleteStatus));
         $order->setIsCustomerNotified(true);
         $order->addStatusToHistory($paymentCompleteStatus, $responseTxt);
-        $order->save();
+        $this->orderResource->save($order);
 
         $this->orderSender->send($order);
     }
