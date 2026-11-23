@@ -13,6 +13,7 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Config\Storage\WriterInterface;
 use Magento\Framework\Exception\LocalizedException;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -51,6 +52,7 @@ class ConnectorTest extends TestCase
     }
 
     /** @dataProvider credencialesIncompletas */
+    #[DataProvider('credencialesIncompletas')]
     public function testFaltanCredencialesNoLlamaAKhipuNiGuarda(string $apiKey, string $merchantId, string $secret): void
     {
         $this->service->expects($this->never())->method('getPaymentMethods');
@@ -126,6 +128,7 @@ class ConnectorTest extends TestCase
     }
 
     /** @dataProvider modosIniciales */
+    #[DataProvider('modosIniciales')]
     public function testModoInicialSegunEmbebidoGuardado(?string $guardado, string $esperado): void
     {
         $this->scopeConfig->method('getValue')->willReturnCallback(
